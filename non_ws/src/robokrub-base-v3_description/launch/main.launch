@@ -1,0 +1,20 @@
+<launch>
+
+  <!-- include our robots -->
+  <param name="robot_description"
+  command="$(find xacro)/xacro $(find robokrub-base-v3_description)/urdf/robokrub-base-v3.xacro" />
+    
+
+  <node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="laser_filter">
+    <rosparam command="load" file="$(find robokrub-base-v3_description)/config/laser_filter.yaml" />
+  </node>
+  
+  <!-- <include file="$(find robokrub-base-v3_description)/launch/depth_to_laser.launch" /> -->
+  <node name="joint_state_publisher" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" />
+  <!-- <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" /> -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+  
+  
+
+
+</launch>
