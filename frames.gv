@@ -1,0 +1,15 @@
+digraph G {
+"base_link" -> "Hokuyo_UST-10LX__2__v1_1"[label=" Broadcaster: /robot_state_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"base_link" -> "left_back_wheel_1"[label=" Broadcaster: /robot_state_publisher\nAverage rate: 20.157\nBuffer length: 4.961\nMost recent transform: 43.261\nOldest transform: 38.3\n"];
+"base_footprint" -> "base_link"[label=" Broadcaster: /robot_state_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"base_link" -> "left_front_wheel_1"[label=" Broadcaster: /robot_state_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"odom" -> "base_footprint"[label=" Broadcaster: /gazebo\nAverage rate: 20.202\nBuffer length: 4.95\nMost recent transform: 43.26\nOldest transform: 38.31\n"];
+"base_link" -> "right_back_wheel_1"[label=" Broadcaster: /robot_state_publisher\nAverage rate: 20.157\nBuffer length: 4.961\nMost recent transform: 43.261\nOldest transform: 38.3\n"];
+"base_link" -> "right_front_wheel_1"[label=" Broadcaster: /robot_state_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"realsense_base_1" -> "realsense_mount_1"[label=" Broadcaster: /robot_state_publisher\nAverage rate: 10.204\nBuffer length: 4.9\nMost recent transform: 43.2\nOldest transform: 38.3\n"];
+"base_link" -> "realsense_base_1"[label=" Broadcaster: /robot_state_publisher\nAverage rate: 10.204\nBuffer length: 4.9\nMost recent transform: 43.2\nOldest transform: 38.3\n"];
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 43.271"[ shape=plaintext ] ;
+}->"odom";
+}
