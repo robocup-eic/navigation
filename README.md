@@ -12,4 +12,7 @@ and configuring move_base
 * Launch robokrub_karto.launch in robokrub_karto packages for creating a map
 * Launch robokrub_navigation in robokrub_navigation packages to launch move_base server
 
+## Install Cartographer
+`$ sudo apt-get install ros-melodic-cartographer ros-melodic-cartographer-ros ros-melodic-cartographer-ros-msgs ros-melodic-cartographer-rviz`
+
 
