@@ -1,5 +1,5 @@
 DWAPlannerROS:
-  max_vel_x: 0.3
+  max_vel_x: 0.7
   min_vel_x: 0.05
   max_vel_theta: 0.2
   min_vel_theta: 0.1

@@ -1,5 +1,5 @@
 <launch>
-  <arg name="model" default="$(env TURTLEBOT3_MODEL)"/>
+  <arg name="model" default="WALKIE"/>
 
   <param name="model" value="$(arg model)"/>
   <node pkg="robokrub_description" type="my_teleop.py" name="turtlebot3_teleop"  output="screen">
