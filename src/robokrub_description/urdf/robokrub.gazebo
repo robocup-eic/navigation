@@ -1,11 +1,13 @@
 <?xml version="1.0" ?>
-<robot name="robokrub" xmlns:xacro="http://www.ros.org/wiki/xacro" >
+<robot name="walkie" xmlns:xacro="http://www.ros.org/wiki/xacro" >
 
 <xacro:property name="body_color" value="Gazebo/Silver" />
-<xacro:arg name="laser_visual" default="true"/>
+<xacro:arg name="laser_visual" default="false"/>
 
 <gazebo>
-  <plugin filename="libgazebo_ros_control.so" name="control"/>
+  <plugin filename="libgazebo_ros_control.so" name="control">
+    <robotNamespace>/walkie</robotNamespace>
+  </plugin>
 </gazebo>
 <gazebo reference="base_link">
   <material>${body_color}</material>
@@ -35,7 +37,7 @@
       <range>
         <min>0.10</min>
         <max>3.5</max>
-        <resolution>0.015</resolution>
+        <resolution>0.01</resolution>
       </range>
       <!-- <noise>
         <type>gaussian</type>
@@ -45,6 +47,7 @@
       </noise> -->
     </ray>
     <plugin name="gazebo_ros_lds_lfcd_controller" filename="libgazebo_ros_laser.so">
+      <robotNamespace>/walkie</robotNamespace>
       <topicName>scan</topicName>
       <frameName>Hokuyo_UST-10LX__2__v1_1</frameName>
     </plugin>
@@ -121,6 +124,7 @@
     <wheelAcceleration>17.45</wheelAcceleration>
     <wheelTorque>80</wheelTorque>
     <rosDebugLevel>na</rosDebugLevel>
+    <robotNamespace>/walkie</robotNamespace>
   </plugin>
 </gazebo>
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<robot name="robokrub" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="walkie" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
 <xacro:include filename="$(find robokrub_description)/urdf/materials.xacro" />
 <xacro:include filename="$(find robokrub_description)/urdf/robokrub.trans" />
@@ -188,6 +188,7 @@
   <parent link="base_link"/>
   <child link="realsense_base_1"/>
   <axis xyz="-0.000175 0.002437 -0.999997"/>
+  <dynamics damping="0.0"/>
 </joint>
 
 <joint name="realsense_roll_joint" type="continuous">
@@ -195,6 +196,7 @@
   <parent link="realsense_base_1"/>
   <child link="realsense_mount_1"/>
   <axis xyz="-0.004129 0.999989 0.002438"/>
+  <dynamics damping="0.0"/>
 </joint>
 
 <joint name="left_back_wheel_joint" type="continuous">

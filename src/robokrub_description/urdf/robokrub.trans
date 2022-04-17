@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<robot name="robokrub" xmlns:xacro="http://www.ros.org/wiki/xacro" >
+<robot name="walkie" xmlns:xacro="http://www.ros.org/wiki/xacro" >
 
 <transmission name="realsense_pitch_joint_tran">
   <type>transmission_interface/SimpleTransmission</type>
