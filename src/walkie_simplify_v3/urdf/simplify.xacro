@@ -1,0 +1,127 @@
+<?xml version="1.0" ?>
+<robot name="simplify" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+<xacro:include filename="$(find simplify_description)/urdf/materials.xacro" />
+<xacro:include filename="$(find simplify_description)/urdf/simplify.trans" />
+<xacro:include filename="$(find simplify_description)/urdf/simplify.gazebo" />
+
+<link name="base_footprint"/>
+
+<joint name="base_joint" type="fixed">
+  <origin rpy="0 0 0" xyz="0 0 0"/>
+  <parent link="base_footprint"/>
+  <child link="base_link"/>
+</joint>
+
+<link name="base_link">
+  <inertial>
+    <origin xyz="-0.10155438032503997 4.4554234660986317e-17 0.6132554860302354" rpy="0 0 0"/>
+    <mass value="282.1921384796744"/>
+    <inertia ixx="35.382906" iyy="36.423757" izz="5.928749" ixy="0.0" iyz="0.0" ixz="3.235891"/>
+  </inertial>
+  <visual>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="package://simplify_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="aluminum_satin"/>
+  </visual>
+  <collision>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="package://simplify_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="camera_1">
+  <inertial>
+    <origin xyz="0.0 3.860015400081353e-17 0.022499999999999964" rpy="0 0 0"/>
+    <mass value="2.7320075113780233"/>
+    <inertia ixx="0.002169" iyy="0.002169" izz="0.003415" ixy="0.0" iyz="-0.0" ixz="0.0"/>
+  </inertial>
+  <visual>
+    <origin xyz="0.132 -0.0 -1.249369" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="package://simplify_description/meshes/camera_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="steel_satin"/>
+  </visual>
+  <collision>
+    <origin xyz="0.132 -0.0 -1.249369" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="package://simplify_description/meshes/camera_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="right_wheel_1">
+  <inertial>
+    <origin xyz="1.4028552336453615e-07 0.0765000000000001 5.449236178955985e-08" rpy="0 0 0"/>
+    <mass value="8.023468798343766"/>
+    <inertia ixx="0.04645" iyy="0.061596" izz="0.04645" ixy="-0.0" iyz="0.0" ixz="0.0"/>
+  </inertial>
+  <visual>
+    <origin xyz="0.155447 0.313 -0.122544" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="package://simplify_description/meshes/right_wheel_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="nylon_66_white"/>
+  </visual>
+  <collision>
+    <origin xyz="0.155447 0.313 -0.122544" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="package://simplify_description/meshes/right_wheel_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="left_wheel_1">
+  <inertial>
+    <origin xyz="-1.686858705773897e-07 -0.07649999999999987 -1.733516468288565e-07" rpy="0 0 0"/>
+    <mass value="8.023468798343766"/>
+    <inertia ixx="0.04645" iyy="0.061596" izz="0.04645" ixy="-0.0" iyz="0.0" ixz="0.0"/>
+  </inertial>
+  <visual>
+    <origin xyz="0.155447 -0.313 -0.122544" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="package://simplify_description/meshes/left_wheel_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="nylon_66_white"/>
+  </visual>
+  <collision>
+    <origin xyz="0.155447 -0.313 -0.122544" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="package://simplify_description/meshes/left_wheel_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<joint name="Rigid1" type="fixed">
+  <origin xyz="-0.132 0.0 1.249369" rpy="0 0 0"/>
+  <parent link="base_link"/>
+  <child link="camera_1"/>
+</joint>
+
+<joint name="Rev4" type="continuous">
+  <origin xyz="-0.155447 -0.313 0.122544" rpy="0 0 0"/>
+  <parent link="base_link"/>
+  <child link="right_wheel_1"/>
+  <axis xyz="0.0 -1.0 0.0"/>
+</joint>
+
+<joint name="Rev5" type="continuous">
+  <origin xyz="-0.155447 0.313 0.122544" rpy="0 0 0"/>
+  <parent link="base_link"/>
+  <child link="left_wheel_1"/>
+  <axis xyz="0.0 1.0 0.0"/>
+</joint>
+
+<xacro:include filename="$(find simplify_description)/urdf/_d435.urdf.xacro" />
+
+<xacro:sensor_d435 name="sensor_d435" parent="camera_1">
+    <origin xyz="-0.0 0.0 0.1" rpy="0 0 0"/>
+    <!-- <origin xyz="0 0 0" rpy="${-90.0 * deg_to_rad} 0 ${-90.0 * deg_to_rad}"/> -->
+</xacro:sensor_d435>
+
+</robot>

@@ -1,0 +1,61 @@
+<?xml version="1.0" ?>
+<robot name="simplify" xmlns:xacro="http://www.ros.org/wiki/xacro" >
+
+<xacro:property name="body_color" value="Gazebo/Silver" />
+
+<gazebo>
+  <plugin name="control" filename="libgazebo_ros_control.so"/>
+</gazebo>
+<gazebo reference="base_link">
+  <material>${body_color}</material>
+  <mu1>0.2</mu1>
+  <mu2>0.2</mu2>
+  <selfCollide>true</selfCollide>
+  <gravity>true</gravity>
+</gazebo>
+
+<gazebo reference="camera_1">
+  <material>${body_color}</material>
+  <mu1>0.2</mu1>
+  <mu2>0.2</mu2>
+  <selfCollide>true</selfCollide>
+</gazebo>
+
+<gazebo reference="right_wheel_1">
+  <material>${body_color}</material>
+  <mu1>0.2</mu1>
+  <mu2>0.2</mu2>
+  <selfCollide>true</selfCollide>
+</gazebo>
+
+<gazebo reference="left_wheel_1">
+  <material>${body_color}</material>
+  <mu1>0.2</mu1>
+  <mu2>0.2</mu2>
+  <selfCollide>true</selfCollide>
+</gazebo>
+
+<gazebo>
+  <plugin name="walkie_controller" filename="libgazebo_ros_diff_drive.so">
+    <commandTopic>cmd_vel</commandTopic>
+    <odometryTopic>odom</odometryTopic>
+    <odometryFrame>odom</odometryFrame>
+    <odometrySource>world</odometrySource>
+    <publishOdomTF>true</publishOdomTF>
+    <robotBaseFrame>base_footprint</robotBaseFrame>
+    <publishWheelTF>false</publishWheelTF>
+    <publishTf>true</publishTf>
+    <publishWheelJointState>true</publishWheelJointState>
+    <legacyMode>false</legacyMode>
+    <updateRate>30</updateRate>
+    <leftJoint>Rev4</leftJoint>
+    <rightJoint>Rev5</rightJoint>
+    <wheelSeparation>0.547</wheelSeparation>
+    <wheelDiameter>0.25</wheelDiameter>
+    <wheelAcceleration>17.45</wheelAcceleration>
+    <wheelTorque>80</wheelTorque>
+    <rosDebugLevel>na</rosDebugLevel>
+  </plugin>
+</gazebo>
+
+</robot>
