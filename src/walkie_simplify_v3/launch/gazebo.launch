@@ -17,7 +17,9 @@
   <node name='onebot_spawn' pkg="gazebo_ros" type="spawn_model" output="screen"
    args="-urdf -param robot_description -model robokrub -x -2 -y -0.5 -z 0"/>
 
-
+  <arg name="use_gui"     default="true"/>
+  <param name="use_gui" value="$(arg use_gui)"/> 
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" args="-rate 20"/>
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find simplify_description)/config/walkie_check.rviz"/>
 </launch>

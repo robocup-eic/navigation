@@ -97,6 +97,29 @@
   </collision>
 </link>
 
+<link name="Lidar">
+  <inertial>
+    <origin rpy="0 0 0" xyz="-0.000648703140907092 4.1998308980724375e-06 0.029712495288845203"/>
+    <mass value="0.36783477848639723"/>
+    <inertia ixx="0.0002" ixy="0.0" ixz="1e-06" iyy="0.000206" iyz="0.0" izz="0.000127"/>
+  </inertial>
+  <visual>
+    <!-- <origin rpy="0 0 0" xyz="-0.199863 0.002451 0.4808"/>  -->
+    <origin rpy="0 0 0" xyz="-0.339863 0.002451 0.1608"/>
+    <geometry>
+      <mesh filename="package://robokrub_description/meshes/Hokuyo_UST-10LX__2__v1_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver_default"/>
+  </visual>
+  <collision>
+    <!-- <origin rpy="0 0 0" xyz="-0.199863 0.002451 0.4808"/> -->
+    <origin rpy="0 0 0" xyz="-0.339863 0.002451 0.1608"/>
+    <geometry>
+      <mesh filename="package://robokrub_description/meshes/Hokuyo_UST-10LX__2__v1_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
 <joint name="Rigid1" type="fixed">
   <origin xyz="-0.132 0.0 1.249369" rpy="0 0 0"/>
   <parent link="base_link"/>
@@ -107,7 +130,7 @@
   <origin xyz="-0.155447 -0.313 0.122544" rpy="0 0 0"/>
   <parent link="base_link"/>
   <child link="right_wheel_1"/>
-  <axis xyz="0.0 -1.0 0.0"/>
+  <axis xyz="0.0 1.0 0.0"/>
 </joint>
 
 <joint name="Rev5" type="continuous">
@@ -123,5 +146,11 @@
     <origin xyz="-0.0 0.0 0.1" rpy="0 0 0"/>
     <!-- <origin xyz="0 0 0" rpy="${-90.0 * deg_to_rad} 0 ${-90.0 * deg_to_rad}"/> -->
 </xacro:sensor_d435>
+
+<joint name="lidar_joint" type="fixed">
+  <origin rpy="0 0 0" xyz="0.199863 -0.002451 0.3308"/>
+  <parent link="base_link"/>
+  <child link="Lidar"/>
+</joint>
 
 </robot>
