@@ -15,7 +15,7 @@
 
   <!-- BEGIN ROBOT 1-->
   <node name='onebot_spawn' pkg="gazebo_ros" type="spawn_model" output="screen"
-   args="-urdf -param robot_description -model robokrub -x -2 -y -0.5 -z 0"/>
+   args="-urdf -param robot_description -model walkie -x -2 -y -0.5 -z 0"/>
 
 
   <!-- <param name="use_gui" value="true"/> -->

@@ -12,7 +12,7 @@ aluminum peripherial evaluation case.
   <!--File includes-->
   <xacro:include filename="$(find simplify_description)/urdf/_d435.gazebo.xacro"/>
 
-  <xacro:macro name="sensor_d435" params="name:=camera topics_ns:=camera parent *origin">
+  <xacro:macro name="sensor_d435" params="name:=camera topics_ns:=walkie/camera parent *origin">
     <xacro:property name="M_PI" value="3.1415926535897931" />
   
     <!-- The following values are approximate, and the camera node

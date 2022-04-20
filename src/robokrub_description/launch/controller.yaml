@@ -5,14 +5,14 @@ walkie:
     publish_rate: 50
 
   # Position Controllers --------------------------------------
+  realsense_yaw_joint_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: realsense_yaw_joint
+    pid: {p: 3.0, i: 0.3, d: 0.1}
   realsense_pitch_joint_position_controller:
     type: effort_controllers/JointPositionController
     joint: realsense_pitch_joint
-    pid: {p: 100.0, i: 0.01, d: 10.0}
-  realsense_roll_joint_position_controller:
-    type: effort_controllers/JointPositionController
-    joint: realsense_roll_joint
-    pid: {p: 100.0, i: 0.01, d: 10.0}
+    pid: {p: 3.0, i: 0.3, d: 0.1}
   # left_back_wheel_joint_position_controller:
   #   type: effort_controllers/JointPositionController
   #   joint: left_back_wheel_joint

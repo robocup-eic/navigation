@@ -105,16 +105,16 @@
 </gazebo>
 
 <gazebo>
-  <plugin name="turtlebot3_burger_controller" filename="libgazebo_ros_diff_drive.so">
-    <commandTopic>cmd_vel</commandTopic>
-    <odometryTopic>odom</odometryTopic>
+  <plugin name="walkie_controller" filename="libgazebo_ros_diff_drive.so">
+    <commandTopic>/walkie/cmd_vel</commandTopic>
+    <odometryTopic>/walkie/odom</odometryTopic>
     <odometryFrame>odom</odometryFrame>
     <odometrySource>world</odometrySource>
     <publishOdomTF>true</publishOdomTF>
     <robotBaseFrame>base_footprint</robotBaseFrame>
     <publishWheelTF>false</publishWheelTF>
     <publishTf>true</publishTf>
-    <publishWheelJointState>true</publishWheelJointState>
+    <publishWheelJointState>false</publishWheelJointState>
     <legacyMode>false</legacyMode>
     <updateRate>20</updateRate>
     <leftJoint>left_back_wheel_joint</leftJoint>
@@ -124,7 +124,6 @@
     <wheelAcceleration>17.45</wheelAcceleration>
     <wheelTorque>80</wheelTorque>
     <rosDebugLevel>na</rosDebugLevel>
-    <robotNamespace>/walkie</robotNamespace>
   </plugin>
 </gazebo>
 

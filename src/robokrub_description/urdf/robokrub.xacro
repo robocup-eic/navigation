@@ -183,7 +183,7 @@
   </collision>
 </link>
 
-<joint name="realsense_pitch_joint" type="continuous">
+<joint name="realsense_yaw_joint" type="continuous">
   <origin rpy="0 0 0" xyz="-0.043071 -0.002012 1.303319"/>
   <parent link="base_link"/>
   <child link="realsense_base_1"/>
@@ -191,7 +191,7 @@
   <dynamics damping="0.0"/>
 </joint>
 
-<joint name="realsense_roll_joint" type="continuous">
+<joint name="realsense_pitch_joint" type="continuous">
   <origin rpy="0 0 0" xyz="0.01485 0.061768 0.028648"/>
   <parent link="realsense_base_1"/>
   <child link="realsense_mount_1"/>
@@ -230,5 +230,12 @@
   <parent link="base_link"/>
   <child link="Hokuyo_UST-10LX__2__v1_1"/>
 </joint>
+
+<xacro:include filename="$(find simplify_description)/urdf/_d435.urdf.xacro" />
+
+<xacro:sensor_d435 name="sensor_d435" parent="realsense_mount_1">
+    <origin xyz="0.01 -0.06 -0.01" rpy="0 0 0"/>
+    <!-- <origin xyz="0 0 0" rpy="${-90.0 * deg_to_rad} 0 ${-90.0 * deg_to_rad}"/> -->
+</xacro:sensor_d435>
 
 </robot>
