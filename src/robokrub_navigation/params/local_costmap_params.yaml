@@ -1,6 +1,6 @@
 local_costmap:
   observation_sources: laser_scan_sensor_1 #laser_scan_sensor_2 #point_cloud_sensor
-  laser_scan_sensor_1: {sensor_frame: Hokuyo_UST-10LX__2__v1_1, data_type: LaserScan, topic: scan, marking: true, clearing: true}
+  laser_scan_sensor_1: {sensor_frame: Hokuyo_UST-10LX__2__v1_1, data_type: LaserScan, topic: /walkie/scan, marking: true, clearing: true}
   global_frame: odom
   robot_base_frame: base_footprint
   update_frequency: 2.0

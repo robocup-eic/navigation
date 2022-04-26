@@ -18,7 +18,7 @@
         <rosparam file="$(find robokrub_navigation)/params/global_costmap_params.yaml" command="load" /> 
         <rosparam file="$(find robokrub_navigation)/params/base_local_planner_params.yaml" command="load" />
         <param name="planner_frequency" type="double" value="0.5"/>
-        <param name="controller_frequency" type="double" value="10.0"/>
+        <param name="controller_frequency" type="double" value="2.0"/>
     </node>
 
     <node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find robokrub_navigation)/rviz/navigation.rviz"/>

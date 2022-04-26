@@ -1,9 +1,10 @@
 <launch>
   <param name="/use_sim_time" value="true" />
+  <param name="/use_gui" value="true" />
 
   <!-- start world -->  
   <node name="gazebo" pkg="gazebo_ros" type="gazebo" 
-   args="$(find robokrub_description)/worlds/empty.world" respawn="false" output="screen" />
+   args="$(find robokrub_description)/worlds/test_zone.world" respawn="false" output="screen" />
 
   <!-- start gui -->
   <!-- <node name="gazebo_gui" pkg="gazebo" type="gui" respawn="false" output="screen"/> -->
@@ -15,7 +16,7 @@
 
   <!-- BEGIN ROBOT 1-->
   <node name='onebot_spawn' pkg="gazebo_ros" type="spawn_model" output="screen"
-   args="-urdf -param robot_description -model walkie -x -2 -y -0.5 -z 0"/>
+   args="-urdf -param robot_description -model walkie -x -0 -y -0 -z 0"/>
 
 
   <!-- <param name="use_gui" value="true"/> -->
