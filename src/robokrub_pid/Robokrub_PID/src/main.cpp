@@ -29,28 +29,36 @@ extern "C"
 
 #define PID_TAU 0.05f
 
-#define PID_LIM_MIN -80.0f
-#define PID_LIM_MAX 80.0f
+#define PID_LIM_MIN -255.0f
+#define PID_LIM_MAX 255.0f
 
-#define PID_LIM_MIN_INT -40.0f
-#define PID_LIM_MAX_INT 40.0f
+#define PID_LIM_MIN_INT -125.0f
+#define PID_LIM_MAX_INT 125.0f
 
 #define SAMPLE_TIME_S 0.05f
 
 //Import encoder library and servo for motor control
 #include <Encoder.h>
-#include <Servo.h>
 
-//Declare pin for encoders and motor
+//Declare pin for encoders
 #define ENCA1 2
 #define ENCA2 3
 #define ENCB1 18
 #define ENCB2 19
-#define IN1 8
-#define IN2 5
+
+//Declare pin for motors
+
+#define PWM_L 9
+#define INA_L 10
+#define INB_L 11
+
+#define PWM_R 5
+#define INA_R 6
+#define INB_R 7
+
 
 // TimerInterrupt ITimer;
-Servo wheel1, wheel2;
+
 Encoder enc1(ENCA1, ENCA2), enc2(ENCB1, ENCB2);
 PIDController pid_left = {PID_KP_LEFT,
                      PID_KI_LEFT, PID_KD_LEFT,
@@ -67,18 +75,25 @@ PIDController pid_right = {PID_KP_RIGHT,
                      SAMPLE_TIME_S};
 
 long posPrev[2] = {0, 0};
-float setRPM = 7.0;
+float setRPM = 50.0;
 float velocity[2] = {0.0,0.0};
 long pos[2] = {0, 0};
 
 unsigned long currT = 0;
 unsigned long prevT = 0;
 
-void setMotor(int pwr, Servo wheel, int middle)
+void setMotor(int pwr, int digiPin1, int digiPin2, int analogPin)
 {
-  // Serial.println(pwr);
-  // wheel1.write(90 + pwr);
-  wheel.write(middle + pwr);
+  if(pwr<0){
+    digitalWrite(digiPin1,HIGH);
+    digitalWrite(digiPin2,LOW);
+    analogWrite(analogPin,-pwr);
+  }
+  else{
+    digitalWrite(digiPin1,LOW);
+    digitalWrite(digiPin2,HIGH);
+    analogWrite(analogPin,pwr);
+  }
 }
 
 void controlMotor()
@@ -103,8 +118,8 @@ void controlMotor()
   //   pwr_right = 0;
   // }
   
-  setMotor(pwr_left, wheel1, 90);
-  setMotor(pwr_right,wheel2, 90);
+  // setMotor(pwr_left, INA_L, INB_L, PWM_L);
+  //setMotor(pwr_right, INA_R, INB_R, PWM_R);
 
   int verbose = 2;
 
@@ -156,10 +171,24 @@ void print_debug(){
 void setup()
 {
   Serial.begin(115200);
-  // pinMode(ENCA, INPUT_PULLUP);
-  // pinMode(ENCB, INPUT_PULLUP);
-  wheel1.attach(IN1);
-  wheel2.attach(IN2);
+
+  pinMode(INA_L, OUTPUT);
+  pinMode(INA_R, OUTPUT);
+  pinMode(INB_L, OUTPUT);
+  pinMode(INB_R, OUTPUT);
+
+  pinMode(PWM_L, OUTPUT);
+  pinMode(PWM_R, OUTPUT);
+
+  digitalWrite(INA_R, HIGH);
+  digitalWrite(INB_R, LOW);
+  analogWrite(PWM_R, 100);
+
+  digitalWrite(INA_L, HIGH);
+  digitalWrite(INB_L, LOW);
+  analogWrite(PWM_L, 100);
+ 
+
   while (!Serial)
   {
     ; // wait for serial port to connect. Needed for native USB
@@ -176,9 +205,6 @@ void setup()
   }
   else
     Serial.println(F("Can't set ITimer3. Select another freq. or timer"));
-
-  // wheel1.write(100);
-  // wheel2.write(100);
 }
 
 void loop()
@@ -186,6 +212,8 @@ void loop()
   currT = millis();
   pos[0] = enc1.read();
   pos[1] = enc2.read();
+
+ 
   // Serial.println(M_PI);
   // setRPM = (int) Serial.read();
   // Serial.println("HELLO");

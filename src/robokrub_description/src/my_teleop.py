@@ -35,13 +35,14 @@ if os.name == 'nt':
 else:
   import tty, termios
 
-BURGER_MAX_LIN_VEL = 1.0
+BURGER_MAX_LIN_VEL = 3.0
 BURGER_MAX_ANG_VEL = 2.84
 
 WAFFLE_MAX_LIN_VEL = 0.26
 WAFFLE_MAX_ANG_VEL = 1.82
 
 LIN_VEL_STEP_SIZE = 0.01
+Y_VEL_STEP_SIZE = 0.05
 ANG_VEL_STEP_SIZE = 0.1
 
 msg = """
@@ -136,6 +137,9 @@ if __name__=="__main__":
     control_linear_vel  = 0.0
     control_angular_vel = 0.0
 
+    y_linear_vel = 0.0
+    y_control_linear_vel  = 0.0
+
     try:
         print(msg)
         while(1):
@@ -161,19 +165,30 @@ if __name__=="__main__":
                 control_linear_vel  = 0.0
                 target_angular_vel  = 0.0
                 control_angular_vel = 0.0
+                y_linear_vel = 0.0
+                y_control_linear_vel = 0.0
                 print(vels(target_linear_vel, target_angular_vel))
+            elif key == 'j' :
+                y_linear_vel = checkLinearLimitVelocity(y_linear_vel + Y_VEL_STEP_SIZE)
+                status = status + 1
+            elif key == 'l' :
+                y_linear_vel = checkLinearLimitVelocity(y_linear_vel - Y_VEL_STEP_SIZE)
+                status = status + 1
             else:
                 if (key == '\x03'):
                     break
 
             if status == 20 :
+                print('y: '+str(y_control_linear_vel))
                 print(msg)
                 status = 0
 
             twist = Twist()
 
+
             control_linear_vel = makeSimpleProfile(control_linear_vel, target_linear_vel, (LIN_VEL_STEP_SIZE/2.0))
-            twist.linear.x = control_linear_vel; twist.linear.y = 0.0; twist.linear.z = 0.0
+            y_control_linear_vel = makeSimpleProfile(y_control_linear_vel, y_linear_vel, (Y_VEL_STEP_SIZE/2.0))
+            twist.linear.x = control_linear_vel; twist.linear.y = y_control_linear_vel; twist.linear.z = 0.0
 
             control_angular_vel = makeSimpleProfile(control_angular_vel, target_angular_vel, (ANG_VEL_STEP_SIZE/2.0))
             twist.angular.x = 0.0; twist.angular.y = 0.0; twist.angular.z = control_angular_vel
