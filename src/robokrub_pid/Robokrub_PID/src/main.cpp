@@ -19,13 +19,13 @@ extern "C"
 #include <PID.h>
 }
 
-#define PID_KP_LEFT 0.4f
-#define PID_KI_LEFT 1.0f
+#define PID_KP_LEFT 3.0f
+#define PID_KI_LEFT 2.0f
 #define PID_KD_LEFT 0.0f
 
-#define PID_KP_RIGHT 0.2f
-#define PID_KI_RIGHT 1.2f
-#define PID_KD_RIGHT 0.01f
+#define PID_KP_RIGHT 3.0f
+#define PID_KI_RIGHT 2.0f
+#define PID_KD_RIGHT 0.0f
 
 #define PID_TAU 0.05f
 
@@ -43,14 +43,13 @@ extern "C"
 //Declare pin for encoders
 #define ENCA1 2
 #define ENCA2 3
-#define ENCB1 18
-#define ENCB2 19
+#define ENCB1 17
+#define ENCB2 18
 
 //Declare pin for motors
-
-#define PWM_L 9
-#define INA_L 10
-#define INB_L 11
+#define PWM_L 8
+#define INA_L 12
+#define INB_L 13
 
 #define PWM_R 5
 #define INA_R 6
@@ -75,7 +74,7 @@ PIDController pid_right = {PID_KP_RIGHT,
                      SAMPLE_TIME_S};
 
 long posPrev[2] = {0, 0};
-float setRPM = 50.0;
+float setRPM = 30.0;
 float velocity[2] = {0.0,0.0};
 long pos[2] = {0, 0};
 
@@ -118,10 +117,10 @@ void controlMotor()
   //   pwr_right = 0;
   // }
   
-  // setMotor(pwr_left, INA_L, INB_L, PWM_L);
-  //setMotor(pwr_right, INA_R, INB_R, PWM_R);
+  setMotor(pwr_left, INA_L, INB_L, PWM_L);
+  setMotor(pwr_right, INA_R, INB_R, PWM_R);
 
-  int verbose = 2;
+  int verbose = 1;
 
   if (verbose == 2){
 
@@ -150,9 +149,10 @@ void controlMotor()
 
   Serial.println("-------------------------------------------------");
   }else if(verbose == 1){
-    Serial.print(velocity[0]);
-    Serial.print(" , ");
-    Serial.println(velocity[1]);
+    Serial.print("velocity2 :  ");
+    Serial.print(velocity[1]);
+    Serial.print("  velocity :  ");
+    Serial.println(velocity[0]);
   }else{
     
   }
@@ -162,10 +162,6 @@ void controlMotor()
   //   prevT = currT;
   // }
 
-}
-
-void print_debug(){
-  
 }
 
 void setup()
@@ -179,20 +175,13 @@ void setup()
 
   pinMode(PWM_L, OUTPUT);
   pinMode(PWM_R, OUTPUT);
-
-  digitalWrite(INA_R, HIGH);
-  digitalWrite(INB_R, LOW);
-  analogWrite(PWM_R, 100);
-
-  digitalWrite(INA_L, HIGH);
-  digitalWrite(INB_L, LOW);
-  analogWrite(PWM_L, 100);
  
 
   while (!Serial)
   {
     ; // wait for serial port to connect. Needed for native USB
   }
+
   //Init PID
   PIDController_Init(&pid_left);
   PIDController_Init(&pid_right);

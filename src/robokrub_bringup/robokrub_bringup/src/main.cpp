@@ -10,9 +10,7 @@ void setup() {
   nh.initNode();
   nh.advertise(odom_pub);
   nh.advertise(joint_states_pub);
-  // nh.advertise(debug_pub);
   nh.subscribe(cmd_vel_sub);
-  // nh.subscribe(servo_direction_sub);
   odom_broadcaster.init(nh);
   static char *joint_states_name[] = {(char*)"realsense_yaw_joint", (char*)"realsense_pitch_joint",(char*)"left_back_wheel_joint", (char*)"right_back_wheel_joint"};
 
@@ -24,68 +22,39 @@ void setup() {
   joint_states.velocity_length = 4;
   joint_states.effort_length   = 4;
 
-  mobileBaseL.attach(mobileBaseLPin);
-  mobileBaseR.attach(mobileBaseRPin);
+  pinMode(INA_L, OUTPUT);
+  pinMode(INA_R, OUTPUT);
+  pinMode(INB_L, OUTPUT);
+  pinMode(INB_R, OUTPUT);
 
-  // camera_pitch_servo.attach(PITCH_PIN);
-  // camera_yaw_servo.attach(YAW_PIN);
-
-  // camera_pitch_servo.write(PITCH_INIT_STATE);
-  // camera_yaw_servo.write(YAW_INIT_STATE);
-
-  
+  pinMode(PWM_L, OUTPUT);
+  pinMode(PWM_R, OUTPUT);
 
 
   //Initiate PID controller
   PIDController_Init(&pidLeft);
   PIDController_Init(&pidRight);
-
- 
-
-
-
-  //Initiate Timer interrupt
-  // ITimer2.init();
-  // // ITimer1.init();
-
-  // //Attach interrupt to control motor function and odom calculate function
-  // if (ITimer2.attachInterruptInterval(CONTROL_INTERVAL_MS, controlMotor))
-  // {
-  //   nh.loginfo("Starting  ITimer2 OK");
-  // }
-  // else
-  //   nh.loginfo("Can't set interrupt on ITimer2");
-
-  
-
-  // if (ITimer2.attachInterruptInterval(PUB_PERIOD, publishState))
-  // {
-  //   nh.loginfo("Starting ITimer3 OK");
-  // }
-  // else
-  //    nh.loginfo("Can't set interrupt on ITimer3");
  
 }
 void loop() {
 
  // put your main code here, to run repeatedly:
-  setMotor(pwr[0], mobileBaseL);
-  setMotor(pwr[1], mobileBaseR);
+  setMotor(pwr[0], INA_L, INB_L, PWM_L);
+  setMotor(pwr[1], INA_R, INB_R, PWM_R);
 
   currT = millis();
-  // currT_state = millis();
 
   pos[0] = encLeft.read();
   pos[1] = encRight.read();
 
   if(currT-prevT>50){
 
-    // nh.loginfo("1");
     velocity[0] = (pos[0]-posPrev[0])*1e3/((float) (currT-prevT));
-    velocity[1] = (posPrev[1]-pos[1])*1e3/((float) (currT-prevT));
-    //Not sure about this
+    velocity[1] = (pos[1]-posPrev[1])*1e3/((float) (currT-prevT));
+
     velocity[0] = (velocity[0] / TICKS_PER_REV)*60;
     velocity[1] = (velocity[1] / TICKS_PER_REV)*60;
+    
     posPrev[0] = pos[0];
     posPrev[1] = pos[1];
 
@@ -93,51 +62,57 @@ void loop() {
     pwr[0] = PIDController_Update(&pidLeft, goal[0], velocity[0]);
     pwr[1] = PIDController_Update(&pidRight, goal[1], velocity[1]);
 
+    //Convert Velocity to m/s
+    velocity[0] = velocity[0]*2*M_PI*WHEEL_RAD/60.0;
+    velocity[1] = velocity[1]*2*M_PI*WHEEL_RAD/60.0;
+
+    //Publish vel left and vel right
+    vl.data = velocity[0];
+    vr.data = velocity[1];
+
+    vl_pub.publish(&vl);
+    vr_pub.publish(&vr);
+
     if((goal[0] == 0.0) && (goal[1] == 0.0)){
       pwr[0] = 0.0;
       pwr[1] = 0.0;
     }
-
-    setMotor(pwr[0], mobileBaseL);
-    setMotor(pwr[1], mobileBaseR);
     prevT = currT;
 
     
   }
 
- 
-
-  velocity[0] = velocity[0]*2*M_PI*WHEEL_RAD/60.0;
-  velocity[1] = velocity[1]*2*M_PI*WHEEL_RAD/60.0;
-
+  //Calculate velocity for the robot based on velocity of left and right wheel
   Vx=((velocity[0]+velocity[1])/2);
   W=((velocity[1]-velocity[0])/WHEEL_DIST);
 
-
-  // debug_msg.data = odom_child_frame;
-  // debug_pub.publish(&debug_msg);
-
   if(currT-prevT_state>50L){
-    
     publishState();
     prevT_state = currT;
-
   }
-
   if(currT-callback_time>5000){
     goal[0] = 0.0;
     goal[1] = 0.0;
   }
-
-
   nh.spinOnce();
 }
 
-void setMotor(int pwr, Servo servo)
+//Function for commanding motor
+void setMotor(int pwr, int digiPin1, int digiPin2, int analogPin)
 {
-  servo.write(90+pwr);
+  if(pwr<0){
+    digitalWrite(digiPin1,HIGH);
+    digitalWrite(digiPin2,LOW);
+    analogWrite(analogPin,-pwr);
+  }
+  else{
+    digitalWrite(digiPin1,LOW);
+    digitalWrite(digiPin2,HIGH);
+    analogWrite(analogPin,pwr);
+  }
 }
 
+//Callback for cmd_vel subscription
 void GoalCb(const geometry_msgs::Twist& twist_msg){
 
   callback_time = millis();
@@ -145,12 +120,15 @@ void GoalCb(const geometry_msgs::Twist& twist_msg){
   float x = twist_msg.linear.x;
   float z = twist_msg.angular.z;
 
+  //Calculate goal_veclocity(rpm) fro both left and right wheel
   float goal_left = x-z*WHEEL_DIST/2;
   float goal_right = x+z*WHEEL_DIST/2;
 
   goal_left = goal_left*60.0/(2*M_PI*WHEEL_RAD);
   goal_right = goal_right*60.0/(2*M_PI*WHEEL_RAD);
 
+
+  //Limit the maximum speed of the robot
   if(goal_left>80.0){
     goal_left = 80.0;
   }
@@ -165,11 +143,14 @@ void GoalCb(const geometry_msgs::Twist& twist_msg){
     goal_right=-80.0;
   }
 
+  //Assign it to the array variable
   goal[0] = goal_left;
   goal[1] = goal_right;
 }
 
+//Function for calculating odometry
 void calOdom(){
+
 
     odom.header.frame_id = odom_header_frame;
     odom.child_frame_id = odom_child_frame;   
@@ -202,29 +183,21 @@ void calOdom(){
     odom.header.stamp = nh.now();
     odom.twist.twist.linear.x = Vx;
     odom.twist.twist.angular.z = W;
-
+    
     
    
 }
+
+//Function for calculating joint states
 void calJointStates(){
     rad[0] = deltaPos[0]*2*M_PI/TICKS_PER_REV;
     rad[1] = deltaPos[1]*2*M_PI/TICKS_PER_REV;
 
     joint_states_pos[2] += rad[0];
     joint_states_pos[3] += rad[1];
-    
-    // joint_states_pos[0] = deg_to_rad((double) current_yaw); 
-    // joint_states_pos[1] = deg_to_rad((double) current_pitch);
-    
-    // joint_states.position[0] += rad[0];
-    // joint_states.position[1] += rad[1];
-    
+
     joint_states_vel[2] = velocity[0];
     joint_states_vel[3] = velocity[1];
-
-    
-    // joint_states.velocity[0] = velocity[0];
-    // joint_states.velocity[1] = velocity[1];
 
     joint_states.position = joint_states_pos;
     joint_states.velocity = joint_states_vel;
@@ -233,18 +206,14 @@ void calJointStates(){
 
     
 }
+
+//Function for publishing odometry and joint states
 void publishState(){
 
-
-
-  setMotor(pwr[0], mobileBaseL);
-  setMotor(pwr[1], mobileBaseR);
-
   deltaPos[0] = pos[0]-prevPosOdom[0];
-  deltaPos[1] = prevPosOdom[1]-pos[1];
+  deltaPos[1] = pos[1]-prevPosOdom[1];
   prevPosOdom[0] = pos[0];
   prevPosOdom[1] = pos[1];
-  // nh.loginfo("2");
 
   calJointStates();
   calOdom();
@@ -256,36 +225,3 @@ void publishState(){
   
 }
 
-// void CameraAdjustCb(const geometry_msgs::Vector3& servo_dir){
-//   // int y = (int) servo_dir.y;
-//   // int z = (int) servo_dir.z;
-
-//   // nh.loginfo("RECEIVING MSG");
-
-//   // current_pitch = camera_pitch_servo.read();
-//   // current_yaw = camera_yaw_servo.read();
-
-//   // current_pitch += y;
-//   // current_yaw += z;
-
-//   // if(current_pitch>PITCH_UPPER_LIMIT){
-//   //   current_pitch = PITCH_UPPER_LIMIT;
-//   // }
-//   // else if(current_pitch<PITCH_LOWER_LIMIT){
-//   //   current_pitch = PITCH_LOWER_LIMIT;
-//   // }
-
-//   // if(current_yaw>YAW_UPPER_LIMIT){
-//   //   current_yaw = YAW_UPPER_LIMIT;
-//   // }
-//   // else if(current_yaw<YAW_LOWER_LIMIT){
-//   //   current_yaw = YAW_LOWER_LIMIT;
-//   // }
-
-//   // camera_yaw_servo.write(current_yaw);
-//   camera_pitch_servo.write(current_pitch);
-// }
-
-// double deg_to_rad(double deg){
-//   return deg*(M_PI/180.0);
-// }

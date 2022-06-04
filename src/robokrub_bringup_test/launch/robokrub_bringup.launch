@@ -9,11 +9,15 @@
 
 
   <!-- Set up TF for the robot -->
-  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
-  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/>
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+      <remap from="/joint_states" to="/walkie/joint_states" />
+  </node>
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+    <remap from="/joint_states" to="/walkie/joint_states" />
+  </node>
 
   <!-- Open rviz for monitoring -->
-  <!-- <node args="-d $(arg rvizconfig)" name="rviz" pkg="rviz" required="true" type="rviz"/> -->
+  <node args="-d $(arg rvizconfig)" name="rviz" pkg="rviz" required="true" type="rviz"/>
 
   <!-- Run serial_node -->
   <node name="serial_node" pkg="rosserial_python" type="serial_node.py">
@@ -27,6 +31,7 @@
     <param name="frame_id" value="Hokuyo_UST-10LX__2__v1_1"/>
     <param name="angle_max" value="1.57"/>
     <param name="angle_min" value="-1.57"/>
+    <remap from="/scan" to="/walkie/scan"/>
   </node>
 
   <!-- <node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="laser_filter">
