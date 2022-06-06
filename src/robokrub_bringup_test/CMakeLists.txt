@@ -120,6 +120,9 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+add_executable(bringup src/bringup.cpp)
+target_link_libraries(bringup ${catkin_LIBRARIES})
+
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/robokrub_bringup_test.cpp
