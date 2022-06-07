@@ -17,11 +17,11 @@
   </node>
 
   <!-- Open rviz for monitoring -->
-  <node args="-d $(arg rvizconfig)" name="rviz" pkg="rviz" required="true" type="rviz"/>
+  <!-- <node args="-d $(arg rvizconfig)" name="rviz" pkg="rviz" required="true" type="rviz"/> -->
 
   <!-- Run serial_node -->
   <node name="serial_node" pkg="rosserial_python" type="serial_node.py">
-    <param name="port" value="$(arg port)"/>
+    <param name="port" value="/dev/ttyUSB0"/>
     <param name="baud" value="115200"/> 
   </node>
 

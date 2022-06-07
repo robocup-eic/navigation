@@ -50,7 +50,7 @@ void loop() {
   if(currT-prevT>50){
 
     velocity[0] = (pos[0]-posPrev[0])*1e3/((float) (currT-prevT));
-    velocity[1] = (pos[1]-posPrev[1])*1e3/((float) (currT-prevT));
+    velocity[1] = (posPrev[1]-pos[1])*1e3/((float) (currT-prevT));
 
     velocity[0] = (velocity[0] / TICKS_PER_REV)*60;
     velocity[1] = (velocity[1] / TICKS_PER_REV)*60;
@@ -66,14 +66,10 @@ void loop() {
     velocity[0] = velocity[0]*2*M_PI*WHEEL_RAD/60.0;
     velocity[1] = velocity[1]*2*M_PI*WHEEL_RAD/60.0;
 
-    //Publish vel left and vel right
-    vl.data = velocity[0];
-    vr.data = velocity[1];
+    // //Publish vel left and vel right
+    
 
-    vl_pub.publish(&vl);
-    vr_pub.publish(&vr);
-
-    if((goal[0] == 0.0) && (goal[1] == 0.0)){
+    if((goal[0] == 0.0) && (goal[1]==0)){
       pwr[0] = 0.0;
       pwr[1] = 0.0;
     }
@@ -86,14 +82,15 @@ void loop() {
   Vx=((velocity[0]+velocity[1])/2);
   W=((velocity[1]-velocity[0])/WHEEL_DIST);
 
-  if(currT-prevT_state>50L){
-    publishState();
-    prevT_state = currT;
-  }
+  // if(currT-prevT_state>50L){
+  //   publishState();
+  //   prevT_state = currT;
+  // }
   if(currT-callback_time>5000){
     goal[0] = 0.0;
     goal[1] = 0.0;
   }
+
   nh.spinOnce();
 }
 
@@ -115,6 +112,9 @@ void setMotor(int pwr, int digiPin1, int digiPin2, int analogPin)
 //Callback for cmd_vel subscription
 void GoalCb(const geometry_msgs::Twist& twist_msg){
 
+  setMotor(pwr[0], INA_L, INB_L, PWM_L);
+  setMotor(pwr[1], INA_R, INB_R, PWM_R);
+
   callback_time = millis();
   
   float x = twist_msg.linear.x;
@@ -126,6 +126,13 @@ void GoalCb(const geometry_msgs::Twist& twist_msg){
 
   goal_left = goal_left*60.0/(2*M_PI*WHEEL_RAD);
   goal_right = goal_right*60.0/(2*M_PI*WHEEL_RAD);
+
+  // if(goal_right>0){
+  //   goal_right -= 0.9;
+  // }
+  // else{
+  //   goal_right += 0.9;
+  // }
 
 
   //Limit the maximum speed of the robot
@@ -150,6 +157,9 @@ void GoalCb(const geometry_msgs::Twist& twist_msg){
 
 //Function for calculating odometry
 void calOdom(){
+
+    setMotor(pwr[0], INA_L, INB_L, PWM_L);
+    setMotor(pwr[1], INA_R, INB_R, PWM_R);
 
 
     odom.header.frame_id = odom_header_frame;
@@ -181,15 +191,22 @@ void calOdom(){
     odom.pose.pose.position.z = 0.4021;
     odom.pose.pose.orientation = odom_trans.transform.rotation;
     odom.header.stamp = nh.now();
-    odom.twist.twist.linear.x = Vx;
-    odom.twist.twist.angular.z = W;
-    
+
+    odom.twist.twist.linear.x = velocity[0];
+    odom.twist.twist.angular.z = velocity[1];
+
+    // odom.twist.twist.linear.x = Vx;
+    // odom.twist.twist.angular.z = W;
+
     
    
 }
 
 //Function for calculating joint states
 void calJointStates(){
+
+    setMotor(pwr[0], INA_L, INB_L, PWM_L);
+    setMotor(pwr[1], INA_R, INB_R, PWM_R);
     rad[0] = deltaPos[0]*2*M_PI/TICKS_PER_REV;
     rad[1] = deltaPos[1]*2*M_PI/TICKS_PER_REV;
 
@@ -210,6 +227,9 @@ void calJointStates(){
 //Function for publishing odometry and joint states
 void publishState(){
 
+  setMotor(pwr[0], INA_L, INB_L, PWM_L);
+  setMotor(pwr[1], INA_R, INB_R, PWM_R);
+
   deltaPos[0] = pos[0]-prevPosOdom[0];
   deltaPos[1] = pos[1]-prevPosOdom[1];
   prevPosOdom[0] = pos[0];
@@ -224,4 +244,3 @@ void publishState(){
   joint_states_pub.publish(&joint_states);
   
 }
-

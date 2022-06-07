@@ -172,6 +172,9 @@ ros::Publisher vl_pub("/walkie/vel_left", &vl);
 std_msgs::Float32 vr;
 ros::Publisher vr_pub("/walkie/vel_right", &vr);
 
+float vleft = 0.0;
+float vright = 0.0;
+
 //debug msg
 std_msgs::String debug_msg;
 ros::Publisher debug_pub("debug",&debug_msg);
@@ -186,4 +189,3 @@ static float joint_states_pos[4] = {0.0, 0.0, 0.0, 0.0};
 static float joint_states_vel[4] = {0.0, 0.0, 0.0, 0.0};
 
 unsigned long callback_time = 0;
-
