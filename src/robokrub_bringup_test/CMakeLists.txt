@@ -12,6 +12,8 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   message_generation
+  tf2
+  tf2_ros
 )
 
 ## System dependencies are found with CMake's conventions
@@ -48,10 +50,9 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-add_message_files(
-  FILES
-  walkie_vel.msg
- )
+#add_message_files(
+#  FILES
+# )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -120,6 +121,9 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+add_executable(bringup src/bringup.cpp)
+target_link_libraries(bringup ${catkin_LIBRARIES})
+
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/robokrub_bringup_test.cpp
@@ -166,9 +170,9 @@ include_directories(
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
-# install(TARGETS ${PROJECT_NAME}_node
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+install(TARGETS bringup
+RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 ## Mark libraries for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_libraries.html

@@ -192,11 +192,11 @@ void calOdom(){
     odom.pose.pose.orientation = odom_trans.transform.rotation;
     odom.header.stamp = nh.now();
 
-    odom.twist.twist.linear.x = velocity[0];
-    odom.twist.twist.angular.z = velocity[1];
+    //odom.twist.twist.linear.x = velocity[0];
+    //odom.twist.twist.angular.z = velocity[1];
 
-    // odom.twist.twist.linear.x = Vx;
-    // odom.twist.twist.angular.z = W;
+    odom.twist.twist.linear.x = Vx;
+    odom.twist.twist.angular.z = W;
 
     
    

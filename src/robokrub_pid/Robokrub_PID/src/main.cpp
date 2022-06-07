@@ -1,86 +1,56 @@
-
 #define ENCODER_OPTIMIZE_INTERRUPTS
-#include <Arduino.h>
 #include <math.h>
-
-//Setting the timer used for interrupts
-#define USE_TIMER_1     false 
-#define USE_TIMER_2     true
-#define USE_TIMER_3     false
-#define USE_TIMER_4     false
-#define USE_TIMER_5     false
-
-#include <TimerInterrupt.h>
-#define TIMER_INTERVAL_MS 50L
-
-//Declare PID variables
 extern "C"
 {
 #include <PID.h>
 }
-
+#include <Encoder.h>
 #define PID_KP_LEFT 3.0f
 #define PID_KI_LEFT 2.0f
 #define PID_KD_LEFT 0.0f
-
 #define PID_KP_RIGHT 3.0f
 #define PID_KI_RIGHT 2.0f
 #define PID_KD_RIGHT 0.0f
-
 #define PID_TAU 0.05f
-
 #define PID_LIM_MIN -255.0f
 #define PID_LIM_MAX 255.0f
-
 #define PID_LIM_MIN_INT -125.0f
 #define PID_LIM_MAX_INT 125.0f
-
 #define SAMPLE_TIME_S 0.05f
-
-//Import encoder library and servo for motor control
-#include <Encoder.h>
-
 //Declare pin for encoders
 #define ENCA1 2
 #define ENCA2 3
 #define ENCB1 17
 #define ENCB2 18
-
 //Declare pin for motors
 #define PWM_L 8
 #define INA_L 12
 #define INB_L 13
-
 #define PWM_R 5
 #define INA_R 6
 #define INB_R 7
-
-
-// TimerInterrupt ITimer;
-
-Encoder enc1(ENCA1, ENCA2), enc2(ENCB1, ENCB2);
-PIDController pid_left = {PID_KP_LEFT,
+#define TICKS_PER_REV 1600
+#define WHEEL_RAD 0.125
+Encoder encLeft(ENCA1,ENCA2), encRight(ENCB1,ENCB2);
+PIDController pidLeft = {PID_KP_LEFT,
                      PID_KI_LEFT, PID_KD_LEFT,
                      PID_TAU,
                      PID_LIM_MIN, PID_LIM_MAX,
                      PID_LIM_MIN_INT, PID_LIM_MAX_INT,
                      SAMPLE_TIME_S};
-
-PIDController pid_right = {PID_KP_RIGHT,
+PIDController pidRight = {PID_KP_RIGHT,
                      PID_KI_RIGHT, PID_KD_RIGHT,
                      PID_TAU,
                      PID_LIM_MIN, PID_LIM_MAX,
                      PID_LIM_MIN_INT, PID_LIM_MAX_INT,
                      SAMPLE_TIME_S};
-
 long posPrev[2] = {0, 0};
-float setRPM = 30.0;
+float setRPM = 25.0;
 float velocity[2] = {0.0,0.0};
 long pos[2] = {0, 0};
-
+int pwr[2] = {0, 0};
 unsigned long currT = 0;
 unsigned long prevT = 0;
-
 void setMotor(int pwr, int digiPin1, int digiPin2, int analogPin)
 {
   if(pwr<0){
@@ -94,119 +64,47 @@ void setMotor(int pwr, int digiPin1, int digiPin2, int analogPin)
     analogWrite(analogPin,pwr);
   }
 }
-
-void controlMotor()
-{
-  // Read Encoder
-  velocity[0] = (pos[0]-posPrev[0]) * 1e3 / ((float)TIMER_INTERVAL_MS);
-  velocity[1] = (posPrev[1]-pos[1]) * 1e3 / ((float)TIMER_INTERVAL_MS);
-  velocity[0] = (velocity[0] / 1600.0)*60.0;
-  velocity[1] = (velocity[1] / 1600.0)*60.0;
-
-  posPrev[0] = pos[0];
-  posPrev[1] = pos[1];
-
-  //Compute PID
-  int pwr_left = PIDController_Update(&pid_left, setRPM, velocity[0]);
-  int pwr_right = PIDController_Update(&pid_right, setRPM, velocity[1]);
-
-  // Serial.println(millis());
-  // if (millis()>8000){
-  //   // Serial.println('HI');
-  //   pwr_left = 0;
-  //   pwr_right = 0;
-  // }
-  
-  setMotor(pwr_left, INA_L, INB_L, PWM_L);
-  setMotor(pwr_right, INA_R, INB_R, PWM_R);
-
-  int verbose = 1;
-
-  if (verbose == 2){
-
-  Serial.println("-------------------------------------------------");
-  Serial.print("SETRPM: ");
-  Serial.println(setRPM);
-  Serial.println("**LEFT**");
-  Serial.println(static_cast<String>("1: position: ") + pos[0]);
-  Serial.println(static_cast<String>("2: velocity: ") + velocity[0]);
-  Serial.println(static_cast<String>("3: commanded voltage: ") + pwr_left);
-  Serial.println("**RIGHT**");
-
-  Serial.println(static_cast<String>("1: position: ") + pos[1]);
-  Serial.println(static_cast<String>("2: velocity: ") + velocity[1]);
-  Serial.println(static_cast<String>("3: commanded voltage: ") + pwr_right);
-
-  // Serial.println("**PID**");
-
-  // Serial.println(static_cast<String>("1: proportional: ") + pid_left.proportional);
-  // Serial.println(static_cast<String>("2: integral: ") + pid_left.integral);
-  // Serial.println(static_cast<String>("3: deriviative: ") + pid_left.differentiator);
-
-  // Serial.println(static_cast<String>("3: propotional: ") + pid_left.proportional);
-  // Serial.println(static_cast<String>("3: integral: ") + pid_left.integral);
-  // Serial.println(static_cast<String>("3: derivative: ") + pid_left.differentiator);
-
-  Serial.println("-------------------------------------------------");
-  }else if(verbose == 1){
-    Serial.print("velocity2 :  ");
-    Serial.print(velocity[1]);
-    Serial.print("  velocity :  ");
-    Serial.println(velocity[0]);
-  }else{
-    
-  }
-
-  // if(currT-prevT>5000){
-  //   setRPM += 1;
-  //   prevT = currT;
-  // }
-
-}
-
-void setup()
-{
+void setup(){
   Serial.begin(115200);
-
   pinMode(INA_L, OUTPUT);
   pinMode(INA_R, OUTPUT);
   pinMode(INB_L, OUTPUT);
   pinMode(INB_R, OUTPUT);
-
   pinMode(PWM_L, OUTPUT);
   pinMode(PWM_R, OUTPUT);
- 
-
-  while (!Serial)
-  {
-    ; // wait for serial port to connect. Needed for native USB
-  }
-
-  //Init PID
-  PIDController_Init(&pid_left);
-  PIDController_Init(&pid_right);
-  // Init timer ITimer1
-  ITimer2.init();
-  if (ITimer2.attachInterruptInterval(TIMER_INTERVAL_MS, controlMotor))
-  {
-    Serial.print(F("Starting  ITimer3 OK, millis() = "));
-    Serial.println(millis());
-  }
-  else
-    Serial.println(F("Can't set ITimer3. Select another freq. or timer"));
+  PIDController_Init(&pidLeft);
+  PIDController_Init(&pidRight);
 }
-
-void loop()
-{
+void loop(){
+  setMotor(pwr[0], INA_L, INB_L, PWM_L);
+  setMotor(pwr[1], INA_R, INB_R, PWM_R);
   currT = millis();
-  pos[0] = enc1.read();
-  pos[1] = enc2.read();
+  pos[0] = encLeft.read();
+  pos[1] = encRight.read();
+  
+  if(currT-prevT>50){
+    velocity[0] = (pos[0]-posPrev[0])*1e3/((float) (currT-prevT));
+    velocity[1] = (posPrev[1]-pos[1])*1e3/((float) (currT-prevT));
+    velocity[0] = (velocity[0] / TICKS_PER_REV)*60;
+    velocity[1] = (velocity[1] / TICKS_PER_REV)*60;
 
- 
-  // Serial.println(M_PI);
-  // setRPM = (int) Serial.read();
-  // Serial.println("HELLO");
-  // put your main code here, to run repeatedly:
-  // Serial.println(pos);
-  delay(1);
+    Serial.print("left velocity: ");
+    Serial.print(velocity[0]);
+
+    Serial.print(" right velocity: ");
+    Serial.println(velocity[1]);
+
+    posPrev[0] = pos[0];
+    posPrev[1] = pos[1];
+    //Calculate PID of each wheel
+    pwr[0] = PIDController_Update(&pidLeft, setRPM, velocity[0]);
+    pwr[1] = PIDController_Update(&pidRight, setRPM, velocity[1]);
+
+    prevT = currT;
+   }
 }
+
+
+
+
+
