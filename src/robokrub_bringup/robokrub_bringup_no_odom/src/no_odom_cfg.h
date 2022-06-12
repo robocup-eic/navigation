@@ -27,6 +27,13 @@ extern "C"
 #include <std_msgs/Int32MultiArray.h>
 #include <geometry_msgs/Twist.h>
 
+//Include IMU related library
+#include <I2Cdev.h>
+#include <MPU6050.h>
+#if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
+    #include <Wire.h>
+#endif
+
 //Define Encoders pin (need to be interrupt pins)
 #define ENCA1 2
 #define ENCA2 3
@@ -64,6 +71,18 @@ unsigned long currT = 0;
 unsigned long prevT_state = 0;
 unsigned long currT_state = 0;
 
+//IMU variables
+MPU6050 accelgyro;
+int16_t ax = 0, ay = 0, az = 0, gx = 0, gy = 0, gz = 0, mx = 0, my = 0, mz = 0;
+
+#define G_TO_ACCEL 9.81
+#define MGAUSS_TO_UTESLA 0.1
+#define UTESLA_TO_TESLA 0.000001
+
+#define ACCEL_SCALE 1 / 16384 // LSB/g
+#define GYRO_SCALE 1 / 131 // LSB/(deg/s)
+// #define MAG_SCALE 0.3 // uT/LSB
+
 
 //Variables
 int32_t posPrev[WHEEL_NUM] = {0, 0};
@@ -77,11 +96,22 @@ int pwr[WHEEL_NUM] = {0, 0};
 float odom_pose[3] = {0.0, 0.0, 0.0};
 float last_theta = 0.0;
 float callback_time = 0.0;
+float prevT_imu = 0.0;
+
+// ROS publishers and subscribers
 ros::NodeHandle nh;
 std_msgs::Float32MultiArray raw_vel;
 ros::Publisher raw_vel_pub("/walkie/raw_vel", &raw_vel);
 std_msgs::Int32MultiArray raw_pos;
 ros::Publisher raw_pos_pub("/walkie/raw_pos", &raw_pos);
+
+geometry_msgs::Vector3 raw_acc;
+ros::Publisher raw_acc_pub("/walkie/imu/raw_linear_acc", &raw_acc);
+geometry_msgs::Vector3 raw_gyr;
+ros::Publisher raw_gyr_pub("/walkie/imu/raw_ang_vel", &raw_gyr);
+// geometry_msgs::Vector3 raw_mag;
+// ros::Publisher raw_mag_pub("/walkie/imu/raw_mag", &raw_mag);
+
 
 //Declare Function
 void GoalCb(const geometry_msgs::Twist&);

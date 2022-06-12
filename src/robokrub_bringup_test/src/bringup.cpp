@@ -18,6 +18,8 @@
 #include <std_msgs/Float32.h>
 #include <std_msgs/Float32MultiArray.h>
 #include <std_msgs/Int32MultiArray.h>
+#include <sensor_msgs/Imu.h>
+#include <sensor_msgs/MagneticField.h>
 
 int WHEEL_NUM = 2;
 float WHEEL_RAD = 0.125;
@@ -28,14 +30,27 @@ float WHEEL_DIST = 0.547;
 class WalkieBase
 {
 private:
+  // Subscriber for raw wheel velocity and position
   ros::Subscriber raw_vel_sub, raw_pos_sub;
+  // Subscriber for raw imu acceleration and magnetic field
+  ros::Subscriber raw_linear_acc_sub, raw_ang_vel_sub;
   ros::Publisher odom_pub, joint_states_pub;
+  // Publisher for imu message and magnetic message
+  ros::Publisher imu_pub;
+  sensor_msgs::Imu raw_imu;
+  // sensor_msgs::MagneticField raw_mag;
+
   tf2_ros::TransformBroadcaster odom_broadcaster;
   geometry_msgs::TransformStamped odom_trans;
   ros::NodeHandle nh;
   sensor_msgs::JointState joint_states;
   nav_msgs::Odometry odom;
   tf2::Quaternion odom_quat;
+
+  //Array for containing IMU data
+  std::vector<double> linear_acc = {0.0, 0.0, 0.0};
+  std::vector<double> angular_vel = {0.0, 0.0, 0.0};
+  // std::vector<double> mag = {0.0, 0.0, 0.0};
 
   double odom_pose[3] = { 0.0, 0.0, 0.0 };
 
@@ -61,6 +76,13 @@ public:
     raw_vel_sub = nh.subscribe("/walkie/raw_vel", 1000, &WalkieBase::velCallback, this);
     raw_pos_sub = nh.subscribe("/walkie/raw_pos", 1000, &WalkieBase::posCallback, this);
 
+    raw_linear_acc_sub = nh.subscribe("/walkie/imu/raw_linear_acc", 1000, &WalkieBase::linearAccCallback, this);
+    raw_ang_vel_sub = nh.subscribe("/walkie/imu/raw_ang_vel", 1000, &WalkieBase::angVelCallback, this);
+    // raw_mag_sub = nh.subscribe("/walkie/imu/raw_linear_acc", 1000, &WalkieBase::magCallback, this);
+
+    imu_pub = nh.advertise<sensor_msgs::Imu>("/walkie/imu/raw_imu",50);
+    // magnetic_pub = nh.advertise<sensor_msgs::MagneticField>("walkie/imu/mag",50);
+
     odom_pub = nh.advertise<nav_msgs::Odometry>("/walkie/odom", 50);
     joint_states_pub = nh.advertise<sensor_msgs::JointState>("/walkie/joint_states", 50);
 
@@ -78,6 +100,45 @@ public:
   {
     pos_left = msg->data[0];
     pos_right = msg->data[1];
+  }
+  void linearAccCallback(const geometry_msgs::Vector3::ConstPtr& msg)
+  {
+    linear_acc[0] = msg->x;
+    linear_acc[1] = msg->y;
+    linear_acc[2] = msg->z;
+  }
+  void angVelCallback(const geometry_msgs::Vector3::ConstPtr& msg)
+  {
+    angular_vel[0] = msg->x;
+    angular_vel[1] = msg->y;
+    angular_vel[2] = msg->z;
+  }
+  // void magCallback(const geometry_msgs::Vector3::ConstPtr& msg)
+  // {
+  //   mag[0] = msg->x;
+  //   mag[1] = msg->y;
+  //   mag[2] = msg->z;    
+  // }
+
+  void publish_imu()
+  {
+    raw_imu.header.stamp = ros::Time::now();
+    // raw_mag.header.stamp = ros::Time::now();
+
+    raw_imu.linear_acceleration.x = linear_acc[0];
+    raw_imu.linear_acceleration.y = linear_acc[1];
+    raw_imu.linear_acceleration.z = linear_acc[2];
+
+    raw_imu.angular_velocity.x = angular_vel[0];
+    raw_imu.angular_velocity.y = angular_vel[1];
+    raw_imu.angular_velocity.z = angular_vel[2];
+
+    // raw_mag.magnetic_field.x = mag[0];
+    // raw_mag.magnetic_field.y = mag[1];
+    // raw_mag.magnetic_field.z = mag[2];
+
+    imu_pub.publish(raw_imu);
+    // magnetic_pub.publish(raw_mag);
   }
  
   void update_odom()
@@ -146,7 +207,7 @@ public:
   }
   void update_joints()
   {
-        //Radian per sec of each wheel
+    //Radian per sec of each wheel
     delta_pos_left = pos_left - prev_pos_left;
     delta_pos_right = prev_pos_right - pos_right ;
     
@@ -182,6 +243,8 @@ int main(int argc, char** argv)
 
   while (ros::ok())
   {
+
+    walkie.publish_imu();
 
     walkie.update_odom();
 
