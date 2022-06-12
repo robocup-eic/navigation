@@ -45,7 +45,7 @@ PIDController pidRight = {PID_KP_RIGHT,
                      PID_LIM_MIN_INT, PID_LIM_MAX_INT,
                      SAMPLE_TIME_S};
 long posPrev[2] = {0, 0};
-float setRPM = 25.0;
+float setRPM = 50.0;
 float velocity[2] = {0.0,0.0};
 long pos[2] = {0, 0};
 int pwr[2] = {0, 0};

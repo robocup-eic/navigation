@@ -12,9 +12,10 @@
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
       <remap from="/joint_states" to="/walkie/joint_states" />
   </node>
-  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+
+  <!-- <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
     <remap from="/joint_states" to="/walkie/joint_states" />
-  </node>
+  </node> -->
 
   <!-- Open rviz for monitoring -->
   <!-- <node args="-d $(arg rvizconfig)" name="rviz" pkg="rviz" required="true" type="rviz"/> -->
@@ -24,6 +25,8 @@
     <param name="port" value="/dev/ttyUSB0"/>
     <param name="baud" value="115200"/> 
   </node>
+
+  <node name="bringup" pkg="robokrub_bringup_test" type="bringup"/>
 
   <!-- Run LaserScan node -->
   <node name="urg_node" pkg="urg_node" type="urg_node">

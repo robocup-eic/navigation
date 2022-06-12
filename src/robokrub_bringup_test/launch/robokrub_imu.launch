@@ -1,0 +1,23 @@
+<launch>
+  <!-- Run serial_node -->
+  <node name="serial_node" pkg="rosserial_python" type="serial_node.py">
+    <param name="port" value="/dev/ttyACM0"/>
+  </node>
+
+    <node pkg="imu_calib" type="apply_calib" name="apply_calib" output="screen" respawn="false">
+        <param name="calib_file" value="/home/arch2/imu_calib.yaml" />
+        <param name="calibrate_gyros" value="true" />
+	<remap from="/raw" to="/imu"/>
+    </node>
+
+    <!-- Filter and fuse raw imu data -->
+    <node pkg="imu_filter_madgwick" type="imu_filter_node" name="imu_filter_madgwick" output="screen" respawn="false" >
+	<remap from="/imu/data_raw" to="/corrected"/>
+        <param name="fixed_frame" value="base_link" />
+        <param name="use_mag" value="true" />
+        <param name="publish_tf" value="true" />
+        <param name="world_frame" value="enu" />
+    </node>
+
+</launch>
+
