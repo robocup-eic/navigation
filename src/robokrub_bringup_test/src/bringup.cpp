@@ -19,7 +19,7 @@
 #include <std_msgs/Float32MultiArray.h>
 #include <std_msgs/Int32MultiArray.h>
 #include <sensor_msgs/Imu.h>
-#include <sensor_msgs/MagneticField.h>
+#include <std_msgs/Float64MultiArray.h>
 
 int WHEEL_NUM = 2;
 float WHEEL_RAD = 0.125;
@@ -76,12 +76,9 @@ public:
     raw_vel_sub = nh.subscribe("/walkie/raw_vel", 1000, &WalkieBase::velCallback, this);
     raw_pos_sub = nh.subscribe("/walkie/raw_pos", 1000, &WalkieBase::posCallback, this);
 
-    raw_linear_acc_sub = nh.subscribe("/walkie/imu/raw_linear_acc", 1000, &WalkieBase::linearAccCallback, this);
-    raw_ang_vel_sub = nh.subscribe("/walkie/imu/raw_ang_vel", 1000, &WalkieBase::angVelCallback, this);
-    // raw_mag_sub = nh.subscribe("/walkie/imu/raw_linear_acc", 1000, &WalkieBase::magCallback, this);
+    raw_linear_acc_sub = nh.subscribe("Arduino/raw_imu", 1000, &WalkieBase::linearAccCallback, this);
 
-    imu_pub = nh.advertise<sensor_msgs::Imu>("/walkie/imu/raw_imu",50);
-    // magnetic_pub = nh.advertise<sensor_msgs::MagneticField>("walkie/imu/mag",50);
+    imu_pub = nh.advertise<sensor_msgs::Imu>("/imu/data_raw",50);
 
     odom_pub = nh.advertise<nav_msgs::Odometry>("/walkie/odom", 50);
     joint_states_pub = nh.advertise<sensor_msgs::JointState>("/walkie/joint_states", 50);
@@ -101,30 +98,22 @@ public:
     pos_left = msg->data[0];
     pos_right = msg->data[1];
   }
-  void linearAccCallback(const geometry_msgs::Vector3::ConstPtr& msg)
+  void linearAccCallback(const std_msgs::Float64MultiArray::ConstPtr& msg)
   {
-    linear_acc[0] = msg->x;
-    linear_acc[1] = msg->y;
-    linear_acc[2] = msg->z;
+    linear_acc[0] = msg->data[0];
+    linear_acc[1] = msg->data[1];
+    linear_acc[2] = msg->data[2];
+
+    angular_vel[0] = msg->data[3];
+    angular_vel[1] = msg->data[4];
+    angular_vel[2] = msg->data[5];
   }
-  void angVelCallback(const geometry_msgs::Vector3::ConstPtr& msg)
-  {
-    angular_vel[0] = msg->x;
-    angular_vel[1] = msg->y;
-    angular_vel[2] = msg->z;
-  }
-  // void magCallback(const geometry_msgs::Vector3::ConstPtr& msg)
-  // {
-  //   mag[0] = msg->x;
-  //   mag[1] = msg->y;
-  //   mag[2] = msg->z;    
-  // }
 
   void publish_imu()
   {
     raw_imu.header.stamp = ros::Time::now();
-    // raw_mag.header.stamp = ros::Time::now();
-
+    
+    raw_imu.header.frame_id = "imu_link";
     raw_imu.linear_acceleration.x = linear_acc[0];
     raw_imu.linear_acceleration.y = linear_acc[1];
     raw_imu.linear_acceleration.z = linear_acc[2];
@@ -132,13 +121,8 @@ public:
     raw_imu.angular_velocity.x = angular_vel[0];
     raw_imu.angular_velocity.y = angular_vel[1];
     raw_imu.angular_velocity.z = angular_vel[2];
-
-    // raw_mag.magnetic_field.x = mag[0];
-    // raw_mag.magnetic_field.y = mag[1];
-    // raw_mag.magnetic_field.z = mag[2];
-
+    
     imu_pub.publish(raw_imu);
-    // magnetic_pub.publish(raw_mag);
   }
  
   void update_odom()
@@ -147,25 +131,12 @@ public:
     //Calculate velocity for the robot
     double Vx = ((vel_left+vel_right)/2); //Velocity forward
     double Vw = ((vel_right-vel_left)/WHEEL_DIST); //Angular velocity
-
-    // float dw = Vw * 0.05 ;// second
-    // odom_pose[2] += dw;
-
-    // float Vxx = (Vx * cos(Vw));
-    // float Vxy = (-1*Vx * sin(Vw));
-
-    // float delta_x = (Vxx*cos(odom_pose[2])-Vxy*sin(odom_pose[2])) * 0.05;
-    // float delta_y = (Vxx*sin(odom_pose[2])+Vxy*cos(odom_pose[2])) * 0.05;
-
-    // odom_pose[0] += delta_x;
-    // odom_pose[1] += delta_y;
     
     double delta_s = WHEEL_RAD * (rad_left + rad_right) / 2.0;
     double theta = WHEEL_RAD * (rad_right - rad_left) / WHEEL_DIST;
 
     double delta_theta = theta - last_theta;
 
-    // TODO change odom equation according to lino
     
     odom_pose[0] += delta_s * cos(odom_pose[2] + (delta_theta / 2.0));
     odom_pose[1] += delta_s * sin(odom_pose[2] + (delta_theta / 2.0));
@@ -189,7 +160,7 @@ public:
     odom_trans.transform.rotation.w = odom_quat.w();
     odom_trans.header.stamp = ros::Time::now();
 
-    odom_broadcaster.sendTransform(odom_trans);
+    //odom_broadcaster.sendTransform(odom_trans);
 
     odom.header.frame_id = odom_header_frame;
     odom.child_frame_id = odom_child_frame;

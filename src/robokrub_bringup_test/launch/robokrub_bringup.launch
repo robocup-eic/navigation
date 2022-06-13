@@ -18,15 +18,32 @@
   </node> -->
 
   <!-- Open rviz for monitoring -->
-  <!-- <node args="-d $(arg rvizconfig)" name="rviz" pkg="rviz" required="true" type="rviz"/> -->
+  <node args="-d $(arg rvizconfig)" name="rviz" pkg="rviz" required="true" type="rviz"/>
 
   <!-- Run serial_node -->
-  <node name="serial_node" pkg="rosserial_python" type="serial_node.py">
+  <node name="Arduino0" pkg="rosserial_python" type="serial_node.py">
     <param name="port" value="/dev/ttyUSB0"/>
+    <param name="baud" value="115200"/> 
+  </node>
+  <node name="Arduino1" pkg="rosserial_python" type="serial_node.py">
+    <param name="port" value="/dev/ttyUSB1"/>
     <param name="baud" value="115200"/> 
   </node>
 
   <node name="bringup" pkg="robokrub_bringup_test" type="bringup"/>
+
+  <!-- Filter and fuse raw imu data -->
+  <node pkg="imu_filter_madgwick" type="imu_filter_node" name="imu_filter_madgwick" output="screen" respawn="false" >
+        <param name="fixed_frame" value="base_link" />
+        <param name="use_mag" value="false" />
+        <param name="publish_tf" value="true" />
+        <param name="world_frame" value="enu"/>
+    </node>
+
+  <node pkg="robot_localization" type="ekf_localization_node" name="ekf_node_name" clear_params="true">
+    <rosparam command="load" file="/home/arch2/navigation/src/robokrub_bringup_test/param/robokrub_ekf.yaml" />
+  </node>
+
 
   <!-- Run LaserScan node -->
   <node name="urg_node" pkg="urg_node" type="urg_node">
@@ -35,11 +52,11 @@
     <param name="angle_max" value="1.57"/>
     <param name="angle_min" value="-1.57"/>
     <remap from="/scan" to="/walkie/scan"/>
-  </node>
+  </node> 
 
-  <!-- <node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="laser_filter">
+  <node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="laser_filter">
     <rosparam command="load" file="$(find robokrub_bringup_test)/config/laser_filter.yaml" />
-  </node> -->
+  </node>
 
 </launch>
 

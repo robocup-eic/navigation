@@ -3,22 +3,13 @@
 
 void setup() {
 
-  Wire.begin();
-
   nh.getHardware()->setBaud(115200);
   nh.initNode();
   // Encoder publisher
   nh.advertise(raw_vel_pub);
   nh.advertise(raw_pos_pub);
 
-  // IMU publisher
-  nh.advertise(raw_acc_pub);
-  nh.advertise(raw_gyr_pub);
-  // nh.advertise(raw_mag_pub); 
-
   nh.subscribe(cmd_vel_sub);
-
-  accelgyro.initialize();
 
   pinMode(INA_L, OUTPUT);
   pinMode(INA_R, OUTPUT);
@@ -89,15 +80,12 @@ void loop() {
 
   setMotor(pwr[0], INA_L, INB_L, PWM_L);
   setMotor(pwr[1], INA_R, INB_R, PWM_R);
-
-  currT = millis();
+    currT = millis();
+  pos[0] = encLeft.read();
+  pos[1] = encRight.read();
 
   // Publish velocity and position
   if(currT-prevT > 50){
-
-    pos[0] = encLeft.read();
-    pos[1] = encRight.read();
-    
     velocity[0] = (pos[0]-posPrev[0])*1e3/((float) (currT-prevT));
     velocity[1] = (posPrev[1]-pos[1])*1e3/((float) (currT-prevT));
 
@@ -119,7 +107,7 @@ void loop() {
     raw_pos.data_length = 2;
     raw_pos.data = pos;
     raw_pos_pub.publish(&raw_pos);
-    
+   
     //Publish velocity
     raw_vel.data_length =2;
     raw_vel.data = velocity;
@@ -133,37 +121,10 @@ void loop() {
     prevT = currT;
   }
 
-  currT = millis();
-  if(currT-prevT_imu > 100){
-
-    accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
-    // accelgyro.getMotion9(&ax, &ay, &az, &gx, &gy, &gz, &mx, &my, &mz);
-    
-    raw_acc.x = ax * (double) ACCEL_SCALE * G_TO_ACCEL;
-    raw_acc.y = ay * (double) ACCEL_SCALE * G_TO_ACCEL;
-    raw_acc.z = az * (double) ACCEL_SCALE * G_TO_ACCEL;
-    raw_acc_pub.publish(&raw_acc);
-
-    raw_gyr.x = gx * (double) GYRO_SCALE * DEG_TO_RAD;
-    raw_gyr.y = gy * (double) GYRO_SCALE * DEG_TO_RAD;
-    raw_gyr.z = gz * (double) GYRO_SCALE * DEG_TO_RAD;
-    raw_gyr_pub.publish(&raw_gyr);
-
-    // raw_mag.x = mx * (double) MAG_SCALE * UTESLA_TO_TESLA;
-    // raw_mag.y = my * (double) MAG_SCALE * UTESLA_TO_TESLA;
-    // raw_mag.z = mz * (double) MAG_SCALE * UTESLA_TO_TESLA;
-    // raw_mag_pub.publish(&raw_mag);
-
-    prevT_imu = currT;
-  }
-
   if(currT-callback_time>5000){
     goal[0] = 0.0;
     goal[1] = 0.0;
 
   }
-
-
-
   nh.spinOnce();
 }
