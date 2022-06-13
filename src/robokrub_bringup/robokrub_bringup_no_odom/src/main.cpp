@@ -2,10 +2,13 @@
 #include "no_odom_cfg.h"
 
 void setup() {
+
   nh.getHardware()->setBaud(115200);
   nh.initNode();
+  // Encoder publisher
   nh.advertise(raw_vel_pub);
   nh.advertise(raw_pos_pub);
+
   nh.subscribe(cmd_vel_sub);
 
   pinMode(INA_L, OUTPUT);
@@ -77,8 +80,7 @@ void loop() {
 
   setMotor(pwr[0], INA_L, INB_L, PWM_L);
   setMotor(pwr[1], INA_R, INB_R, PWM_R);
-
-  currT = millis();
+    currT = millis();
   pos[0] = encLeft.read();
   pos[1] = encRight.read();
 
@@ -105,7 +107,7 @@ void loop() {
     raw_pos.data_length = 2;
     raw_pos.data = pos;
     raw_pos_pub.publish(&raw_pos);
-    
+   
     //Publish velocity
     raw_vel.data_length =2;
     raw_vel.data = velocity;
@@ -124,8 +126,5 @@ void loop() {
     goal[1] = 0.0;
 
   }
-
-
-
   nh.spinOnce();
 }

@@ -64,7 +64,6 @@ unsigned long currT = 0;
 unsigned long prevT_state = 0;
 unsigned long currT_state = 0;
 
-
 //Variables
 int32_t posPrev[WHEEL_NUM] = {0, 0};
 int32_t pos[WHEEL_NUM] = {0, 0};
@@ -77,6 +76,8 @@ int pwr[WHEEL_NUM] = {0, 0};
 float odom_pose[3] = {0.0, 0.0, 0.0};
 float last_theta = 0.0;
 float callback_time = 0.0;
+
+// ROS publishers and subscribers
 ros::NodeHandle nh;
 std_msgs::Float32MultiArray raw_vel;
 ros::Publisher raw_vel_pub("/walkie/raw_vel", &raw_vel);

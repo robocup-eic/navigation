@@ -19,7 +19,7 @@
         <rosparam file="$(find robokrub_navigation)/params/move_base_params.yaml" command="load" />
         <rosparam file="$(find robokrub_navigation)/params/base_local_planner_params.yaml" command="load" />
         <remap from="/cmd_vel" to="/walkie/cmd_vel"/>
-        <remap from="/odom" to="/walkie/odom"/>
+        <remap from="/odom" to="/odometry/filtered"/>
     </node>
 
     <node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find robokrub_navigation)/rviz/navigation.rviz"/>
