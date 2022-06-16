@@ -11,6 +11,8 @@
         <param name="use_mag" value="false" />
         <param name="publish_tf" value="true" />
         <param name="world_frame" value="enu" />
+	<param name="orientation_stddev" value="0.1"/>
+	<param name="gain" value="0.08"/>
     </node>
 
 </launch>

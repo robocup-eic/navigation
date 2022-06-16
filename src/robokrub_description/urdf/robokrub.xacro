@@ -12,7 +12,6 @@
   <child link="base_link"/>
 </joint>
 
-
 <link name="base_link">
   <inertial>
     <origin rpy="0 0 0" xyz="-0.009538022388619444 0.0020469906835618064 0.087820296886698"/>
@@ -230,6 +229,14 @@
   <parent link="base_link"/>
   <child link="Hokuyo_UST-10LX__2__v1_1"/>
 </joint>
+
+<joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <link name="imu_link"/>
 
 <!-- <xacro:include filename="$(find simplify_description)/urdf/_d435.urdf.xacro" />
 

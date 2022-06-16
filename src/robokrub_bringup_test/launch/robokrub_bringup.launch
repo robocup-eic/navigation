@@ -18,7 +18,7 @@
   </node> -->
 
   <!-- Open rviz for monitoring -->
-  <node args="-d $(arg rvizconfig)" name="rviz" pkg="rviz" required="true" type="rviz"/>
+  <!-- <node args="-d $(arg rvizconfig)" name="rviz" pkg="rviz" required="true" type="rviz"/> -->
 
   <!-- Run serial_node -->
   <node name="Arduino0" pkg="rosserial_python" type="serial_node.py">
@@ -42,6 +42,7 @@
 
   <node pkg="robot_localization" type="ekf_localization_node" name="ekf_node_name" clear_params="true">
     <rosparam command="load" file="/home/arch2/navigation/src/robokrub_bringup_test/param/robokrub_ekf.yaml" />
+    <remap from="/odometry/filtered" to="/walkie/odom_filtered"/>
   </node>
 
 
