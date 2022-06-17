@@ -21,10 +21,10 @@
   <!-- <node args="-d $(arg rvizconfig)" name="rviz" pkg="rviz" required="true" type="rviz"/> -->
 
   <!-- Run serial_node -->
-  <node name="Arduino0" pkg="rosserial_python" type="serial_node.py">
+  <!-- <node name="Arduino0" pkg="rosserial_python" type="serial_node.py">
     <param name="port" value="/dev/ttyUSB0"/>
     <param name="baud" value="115200"/> 
-  </node>
+  </node> -->
   <node name="Arduino1" pkg="rosserial_python" type="serial_node.py">
     <param name="port" value="/dev/ttyUSB1"/>
     <param name="baud" value="115200"/> 
@@ -41,7 +41,7 @@
     </node>
 
   <node pkg="robot_localization" type="ekf_localization_node" name="ekf_node_name" clear_params="true">
-    <rosparam command="load" file="/home/arch2/navigation/src/robokrub_bringup_test/param/robokrub_ekf.yaml" />
+    <rosparam command="load" file="$(find robokrub_bringup_test)/param/robokrub_ekf.yaml" />
     <remap from="/odometry/filtered" to="/walkie/odom_filtered"/>
   </node>
 
@@ -55,9 +55,15 @@
     <remap from="/scan" to="/walkie/scan"/>
   </node> 
 
-  <node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="laser_filter">
+  <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+    <arg name="camera" value="/walkie/camera"/>
+    <arg name="publish_tf" value="false"/>
+  </include>
+
+  <!-- <node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="laser_filter">
     <rosparam command="load" file="$(find robokrub_bringup_test)/config/laser_filter.yaml" />
-  </node>
+  </node> -->
+
 
 </launch>
 
