@@ -99,10 +99,10 @@ class Follow_person(smach.State):
         while True:
             
             try:
-                pose = self.tfBuffer.lookup_transform('base_footprint','human_base_footprint',rospy.Time.now()-rospy.Duration.from_sec(0.5))
+                pose = self.tfBuffer.lookup_transform('map','human_frame',rospy.Time.now()-rospy.Duration.from_sec(0.5))
 
                 goal = MoveBaseGoal()
-                goal.target_pose.header.frame_id = "base_footprint"
+                goal.target_pose.header.frame_id = "map"
                 goal.target_pose.header.stamp = rospy.Time.now()-rospy.Duration.from_sec(0.5)
                 goal.target_pose.pose.position.x = pose.transform.translation.x
                 goal.target_pose.pose.position.y = pose.transform.translation.y
@@ -183,20 +183,24 @@ class Get_bounding_box(smach.State):
             return
         try:
             cv_image = self.bridge.imgmsg_to_cv2(frame, frame.encoding)
+            cv_image = cv2.resize(cv_image,(1080, 720))
             # pick one pixel among all the pixels with the closest range:
             pix = (self.x_pixel, self.y_pixel)
             if self.intrinsics:
                 depth = cv_image[pix[1], pix[0]]
+                
                 result = rs2.rs2_deproject_pixel_to_point(self.intrinsics, [pix[0], pix[1]], depth)
-                y = result[0]/1000
+                y = -result[0]/1000
                 x = result[2]/1000
                 z = result[1]/1000
-                if x>=0.1:
-                    rospy.loginfo("Publishing TF")
+                if x>0:
+                    rospy.loginfo("Target is at: ({}, {})".format(self.x_pixel, self.y_pixel))
+                    rospy.loginfo("Depth is {}".format(depth))
+                    rospy.loginfo("Detected at (x,y,z): {}".format([r/1000 for r in result]))
                     rospy.sleep(0.1)
 
                     br = tf.TransformBroadcaster()
-                    br.sendTransform((x, y, -1.332+z),
+                    br.sendTransform((x, y, 0),
                     tf.transformations.quaternion_from_euler(0, 0, 0),
                     rospy.Time.now(),
                     'human_frame','realsense_mount_1')
@@ -217,6 +221,7 @@ class Get_bounding_box(smach.State):
         # change subscribed data to numpy.array and save it as "frame"
         self.frame = self.bridge.imgmsg_to_cv2(data,'bgr8')
         self.frame = cv2.resize(self.frame, (1080,720))
+        cv2.imshow("frame",self.frame)
         
         # send frame to server and recieve the result      
         result = self.c.req(self.frame)
